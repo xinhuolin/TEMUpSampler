@@ -19,8 +19,8 @@ def load_model(model_path, data, scale_factor, cuda):
 
 	net = Net(upscale_factor = scale_factor)
 
-	# if cuda:
-	# 	net = net.cuda()
+	if cuda:
+		net = net.cuda()
 
 
 	# if not cuda:
@@ -28,7 +28,10 @@ def load_model(model_path, data, scale_factor, cuda):
 	# else:
 	# 	net.load_state_dict(torch.load(model_path))
 	if os.name == 'posix':
-		net = torch.load(model_path)
+		if cuda:
+			net = torch.load(model_path)
+		else:
+			net = torch.load(model_path, map_location=torch.device('cpu'))
 	else:
 		from functools import partial
 		import pickle
