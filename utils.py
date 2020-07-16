@@ -1,6 +1,5 @@
 import torch
 from torchvision.transforms import ToTensor
-from torch.autograd import Variable
 import numpy as np
 import torchvision
 import importlib
@@ -20,13 +19,14 @@ def load_model(model_path, data, scale_factor, cuda):
 
 	net = Net(upscale_factor = scale_factor)
 
-	if cuda:
-		net = net.cuda()
+	# if cuda:
+	# 	net = net.cuda()
 
-#	if not cuda:
-#		net.load_state_dict(torch.load(model_path, map_location=lambda storage, loc: storage))
-#	else:
-#		net.load_state_dict(torch.load(model_path))
+
+	# if not cuda:
+	# 	net.load_state_dict(torch.load(model_path, map_location=lambda storage, loc: storage))
+	# else:
+	# 	net.load_state_dict(torch.load(model_path))
 	if os.name == 'posix':
 		net = torch.load(model_path)
 	else:
@@ -39,9 +39,7 @@ def load_model(model_path, data, scale_factor, cuda):
 	transform = ToTensor()
 	ori_tensor = transform(data)
 	if cuda:
-		ori_tensor = Variable(ori_tensor.cuda())
-	else:
-		ori_tensor = Variable(ori_tensor)
+		ori_tensor = ori_tensor.cuda()
 	ori_tensor = torch.unsqueeze(ori_tensor,0)
 
 	output = net(ori_tensor)
