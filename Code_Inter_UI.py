@@ -65,7 +65,7 @@ class Code_MainWindow(Ui_MainWindow):
     def BrowseFolder(self):
         self.imagePath_content, _ = QFileDialog.getOpenFileName(self,
                                                             "open",
-                                                            "/home/",
+                                                            "/media/Elements/hewei/",
                                                             "All Files (*);; Image Files (*.png *.tif *.jpg)")
         if self.imagePath_content:
             self.imagePath.setText(self.imagePath_content)
