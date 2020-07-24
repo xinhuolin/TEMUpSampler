@@ -5,8 +5,9 @@ import torchvision
 import importlib
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from model import Net
+import torch.nn as nn
 import os
-
+"""Model 0 : irdm_pth"""
 """Model 1 : /home/student/Documents/u-net_pytorch/epochs200_layer3_ori_256/"""
 """Model 2 : /home/student/Documents/u-net-pytorch-original/lr001_weightdecay00001/"""
 """Model 3 : /home/student/Documents/u-net_denoising/dataset_small_mask/"""
@@ -17,7 +18,11 @@ import os
 
 def load_model(model_path, data, scale_factor, cuda):
 
-	net = Net(upscale_factor = scale_factor)
+	if os.path.basename(model_path) == "upinterpolation_superresolution_gen1.pth":
+		from unet_standard import NestedUNet
+		net = NestedUNet()
+	else:
+		net = Net(upscale_factor = scale_factor)
 
 	if cuda:
 		net = net.cuda()
@@ -27,17 +32,22 @@ def load_model(model_path, data, scale_factor, cuda):
 	# 	net.load_state_dict(torch.load(model_path, map_location=lambda storage, loc: storage))
 	# else:
 	# 	net.load_state_dict(torch.load(model_path))
-	if os.name == 'posix':
+	if os.path.basename(model_path) == "upinterpolation_superresolution_gen1.pth":
 		if cuda:
-			net = torch.load(model_path)
-		else:
-			net = torch.load(model_path, map_location=torch.device('cpu'))
+			net = nn.DataParallel(net)
+		net.load_state_dict(torch.load(model_path))
 	else:
-		from functools import partial
-		import pickle
-		pickle.load = partial(pickle.load, encoding="latin1")
-		pickle.Unpickler = partial(pickle.Unpickler, encoding="latin1")
-		net = torch.load(model_path, map_location=lambda storage, loc: storage, pickle_module=pickle)
+		if os.name == 'posix':
+			if cuda:
+				net = torch.load(model_path)
+			else:
+				net = torch.load(model_path, map_location=torch.device('cpu'))
+		else:
+			from functools import partial
+			import pickle
+			pickle.load = partial(pickle.load, encoding="latin1")
+			pickle.Unpickler = partial(pickle.Unpickler, encoding="latin1")
+			net = torch.load(model_path, map_location=lambda storage, loc: storage, pickle_module=pickle)
 
 	transform = ToTensor()
 	ori_tensor = transform(data)
