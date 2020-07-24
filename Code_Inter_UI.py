@@ -53,6 +53,7 @@ class Code_MainWindow(Ui_MainWindow):
         self.model_output = None
 
         self.__models = {
+                'upinterpolation_superresolution_gen1' : 2,
                 'denoise&bgremoval2x' : 2,
                 'denoise2x' : 2,
                 'dataset_interpolation4x' : 4,
