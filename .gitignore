@@ -1,0 +1,10 @@
+
+*.pyc
+*.pyc
+__pycache__/Inter_UI.cpython-37.pyc
+__pycache__/model.cpython-37.pyc
+__pycache__/unet_standard.cpython-37.pyc
+__pycache__/utils.cpython-37.pyc
+mypackage/__pycache__/__init__.cpython-37.pyc
+mypackage/model/__pycache__/__init__.cpython-37.pyc
+mypackage/model/__pycache__/unet_standard2x.cpython-37.pyc
