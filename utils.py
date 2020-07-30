@@ -21,6 +21,10 @@ def load_model(model_path, data, scale_factor, cuda):
 	if os.path.basename(model_path) == "upinterpolation_superresolution_gen1.pth":
 		from unet_standard import NestedUNet
 		net = NestedUNet()
+	elif os.path.basename(model_path) == "Gen1-noNoiseNoBackgroundUpinterpolation2x.pth" or \
+			os.path.basename(model_path) == "Gen1-noNoiseUpinterpolation2x.pth":
+		from mypackage.model.unet_standard2x import NestedUNet
+		net = NestedUNet()
 	else:
 		net = Net(upscale_factor = scale_factor)
 
@@ -35,6 +39,12 @@ def load_model(model_path, data, scale_factor, cuda):
 	if os.path.basename(model_path) == "upinterpolation_superresolution_gen1.pth":
 		if cuda:
 			net = nn.DataParallel(net)
+		net.load_state_dict(torch.load(model_path))
+	elif os.path.basename(model_path) == "Gen1-noNoiseNoBackgroundUpinterpolation2x.pth" or \
+			os.path.basename(model_path) == "Gen1-noNoiseUpinterpolation2x.pth":
+		if cuda:
+			net = nn.DataParallel(net)
+		# net.load_state_dict({k.replace('module.', ''): v for k, v in torch.load(model_path).items()})
 		net.load_state_dict(torch.load(model_path))
 	else:
 		if os.name == 'posix':
@@ -51,10 +61,42 @@ def load_model(model_path, data, scale_factor, cuda):
 
 	transform = ToTensor()
 	ori_tensor = transform(data)
-	if cuda:
-		ori_tensor = ori_tensor.cuda()
 	ori_tensor = torch.unsqueeze(ori_tensor,0)
 
+	padding_left = 0
+	padding_right = 0
+	padding_top = 0
+	padding_bottom = 0
+	ori_height = ori_tensor.size()[2]
+	ori_width = ori_tensor.size()[3]
+	use_padding = False
+	if ori_width>=ori_height:
+		padsize = ori_width
+	else:
+		padsize = ori_height
+	if np.log2(padsize) >= 7.0:
+		if (np.log2(padsize)-7) % 1 > 0:
+			padsize = 2**(np.log2(padsize)//1+1)
+	else:
+		padsize = 2**7
+	if ori_height<padsize:
+		padding_top = int(padsize - ori_height) // 2
+		padding_bottom =int(padsize - ori_height - padding_top)
+		use_padding = True
+	if ori_width < padsize:
+		padding_left = int(padsize - ori_width) // 2
+		padding_right = int(padsize - ori_width - padding_left)
+		use_padding = True
+	if use_padding:
+		padding_transform = torch.nn.ConstantPad2d((padding_left, \
+												   padding_right, \
+												   padding_top, \
+												   padding_bottom), 0)
+		ori_tensor = padding_transform(ori_tensor)
+
+
+	if cuda:
+		ori_tensor = ori_tensor.cuda()
 	output = net(ori_tensor)
 
 	if cuda:
@@ -62,7 +104,9 @@ def load_model(model_path, data, scale_factor, cuda):
 	else:
 		result = (output.data).numpy()
 
-	result = result[0,0,:,:]
+
+	padsize = int(padsize)
+	result = result[0,0,2*padding_top:2*(padsize-padding_bottom),2*padding_left:2*(padsize-padding_right)]
 	return result
 
 

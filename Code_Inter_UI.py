@@ -57,9 +57,8 @@ class Code_MainWindow(Ui_MainWindow):
                 'denoise&bgremoval2x' : 2,
                 'denoise2x' : 2,
                 'dataset_interpolation4x' : 4,
-                'Model 4' : 4,
-                'Model 5' : 5,
-                'Model 6' : 6
+                'Gen1-noNoiseNoBackgroundUpinterpolation2x' : 2,
+                'Gen1-noNoiseUpinterpolation2x' : 2,
         }
 
 
