@@ -59,6 +59,7 @@ class Code_MainWindow(Ui_MainWindow):
                 'dataset_interpolation4x' : 4,
                 'Gen1-noNoiseNoBackgroundUpinterpolation2x' : 2,
                 'Gen1-noNoiseUpinterpolation2x' : 2,
+                'Gen1-noNoiseNoBackgroundSuperresolution' : 2,
         }
 
 

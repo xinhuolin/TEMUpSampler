@@ -22,7 +22,8 @@ def load_model(model_path, data, scale_factor, cuda):
 		from unet_standard import NestedUNet
 		net = NestedUNet()
 	elif os.path.basename(model_path) == "Gen1-noNoiseNoBackgroundUpinterpolation2x.pth" or \
-			os.path.basename(model_path) == "Gen1-noNoiseUpinterpolation2x.pth":
+			os.path.basename(model_path) == "Gen1-noNoiseUpinterpolation2x.pth" or \
+		os.path.basename(model_path) == "Gen1-noNoiseNoBackgroundSuperresolution.pth":
 		from mypackage.model.unet_standard2x import NestedUNet
 		net = NestedUNet()
 	else:
@@ -36,16 +37,15 @@ def load_model(model_path, data, scale_factor, cuda):
 	# 	net.load_state_dict(torch.load(model_path, map_location=lambda storage, loc: storage))
 	# else:
 	# 	net.load_state_dict(torch.load(model_path))
-	if os.path.basename(model_path) == "upinterpolation_superresolution_gen1.pth":
+	if os.path.basename(model_path) == "upinterpolation_superresolution_gen1.pth" or \
+			os.path.basename(model_path) == "Gen1-noNoiseNoBackgroundUpinterpolation2x.pth" or \
+			os.path.basename(model_path) == "Gen1-noNoiseUpinterpolation2x.pth" or \
+			os.path.basename(model_path) == "Gen1-noNoiseNoBackgroundSuperresolution.pth":
 		if cuda:
 			net = nn.DataParallel(net)
-		net.load_state_dict(torch.load(model_path))
-	elif os.path.basename(model_path) == "Gen1-noNoiseNoBackgroundUpinterpolation2x.pth" or \
-			os.path.basename(model_path) == "Gen1-noNoiseUpinterpolation2x.pth":
-		if cuda:
-			net = nn.DataParallel(net)
-		# net.load_state_dict({k.replace('module.', ''): v for k, v in torch.load(model_path).items()})
-		net.load_state_dict(torch.load(model_path))
+			net.load_state_dict(torch.load(model_path))
+		else:
+			net.load_state_dict({k.replace('module.', ''): v for k, v in torch.load(model_path).items()})
 	else:
 		if os.name == 'posix':
 			if cuda:
